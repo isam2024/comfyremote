@@ -102,6 +102,9 @@ export default function PodCard({ pod }) {
         <div className="text-sm text-gray-400">
           GPU: <span className="text-white">{pod.gpu_id}</span>
         </div>
+        <div className="text-sm text-gray-400">
+          Rate: <span className="text-blue-400 font-semibold">${pod.hourly_rate}/hr</span>
+        </div>
         {pod.status === 'initializing' && (
           <div>
             <div className="text-sm text-gray-400 mb-1">
@@ -125,7 +128,7 @@ export default function PodCard({ pod }) {
       {/* Cost */}
       <div className="mb-4">
         <div className="text-sm text-gray-400">
-          Cost: <span className="text-green-400 font-semibold">${pod.cost_so_far.toFixed(2)}</span>
+          Total Cost: <span className="text-green-400 font-semibold">${pod.cost_so_far.toFixed(2)}</span>
         </div>
       </div>
 

@@ -117,13 +117,17 @@ class CostCalculator:
         total = 0.0
 
         for pod in pods:
-            if pod.start_time:
+            # For running/initializing pods, calculate real-time cost
+            if pod.status in ['running', 'initializing'] and pod.start_time:
                 cost = self.calculate_cost(
                     pod.gpu_id,
                     pod.start_time,
                     pod.config.interruptible
                 )
                 total += cost
+            # For stopped/terminated pods, use the pre-calculated cost
+            elif hasattr(pod, 'cost_so_far'):
+                total += pod.cost_so_far
 
         return round(total, 2)
 
@@ -154,21 +158,26 @@ class CostCalculator:
         # Group by GPU type
         by_gpu = {}
         for pod in pods:
-            if pod.start_time:
+            # Calculate cost based on pod status
+            if pod.status in ['running', 'initializing'] and pod.start_time:
                 cost = self.calculate_cost(
                     pod.gpu_id,
                     pod.start_time,
                     pod.config.interruptible
                 )
+            elif hasattr(pod, 'cost_so_far'):
+                cost = pod.cost_so_far
+            else:
+                continue
 
-                if pod.gpu_id not in by_gpu:
-                    by_gpu[pod.gpu_id] = {
-                        'count': 0,
-                        'cost': 0.0,
-                    }
+            if pod.gpu_id not in by_gpu:
+                by_gpu[pod.gpu_id] = {
+                    'count': 0,
+                    'cost': 0.0,
+                }
 
-                by_gpu[pod.gpu_id]['count'] += 1
-                by_gpu[pod.gpu_id]['cost'] += cost
+            by_gpu[pod.gpu_id]['count'] += 1
+            by_gpu[pod.gpu_id]['cost'] += cost
 
         # Round costs
         for gpu_id in by_gpu:

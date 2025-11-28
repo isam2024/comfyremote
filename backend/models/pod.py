@@ -69,6 +69,7 @@ class Pod:
             'config': self.config.to_dict(),
             'start_time': self.start_time.isoformat() if self.start_time else None,
             'endpoint_url': self.endpoint_url,
+            'hourly_rate': round(self.hourly_rate, 2),
             'cost_so_far': round(self.cost_so_far, 2),
             'setup_progress': round(self.setup_progress, 1),
             'last_heartbeat': self.last_heartbeat.isoformat() if self.last_heartbeat else None,
