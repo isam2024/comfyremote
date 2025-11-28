@@ -97,6 +97,19 @@ export const gpuApi = {
   async list() {
     return apiRequest('/gpus');
   },
+
+  /**
+   * Check GPU availability
+   */
+  async checkAvailability(gpuId, interruptible = true) {
+    return apiRequest('/gpus/check-availability', {
+      method: 'POST',
+      body: JSON.stringify({
+        gpu_id: gpuId,
+        interruptible,
+      }),
+    });
+  },
 };
 
 /**

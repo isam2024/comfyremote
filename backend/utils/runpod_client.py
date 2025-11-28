@@ -305,6 +305,95 @@ class RunPodClient:
         logger.error(f"Timeout waiting for pod {pod_id} to reach status {target_status}")
         return False
 
+    def get_gpu_types(self) -> Optional[Dict]:
+        """
+        Get available GPU types from RunPod
+
+        Returns:
+            Dictionary with GPU availability info or None
+
+        Raises:
+            requests.RequestException: If API call fails
+        """
+        url = f"{self.base_url}/gpuTypes"
+
+        try:
+            response = requests.get(
+                url,
+                headers=self._get_headers(),
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                return response.json()
+            else:
+                logger.warning(f"Failed to get GPU types: {response.status_code}")
+                return None
+
+        except Exception as e:
+            logger.warning(f"Failed to get GPU types: {e}")
+            return None
+
+    def check_gpu_availability(self, gpu_id: str) -> Dict:
+        """
+        Check if a specific GPU type is available
+
+        Args:
+            gpu_id: GPU type ID to check
+
+        Returns:
+            Dictionary with availability info:
+            {
+                'available': bool,
+                'gpu_id': str,
+                'min_vcpu': int or None,
+                'min_memory': int or None,
+                'community_available': bool,
+                'secure_available': bool
+            }
+        """
+        result = {
+            'available': False,
+            'gpu_id': gpu_id,
+            'min_vcpu': None,
+            'min_memory': None,
+            'community_available': False,
+            'secure_available': False,
+        }
+
+        try:
+            gpu_types = self.get_gpu_types()
+            if not gpu_types:
+                # Can't determine availability, assume available
+                result['available'] = True
+                return result
+
+            # Check if GPU is in available list
+            for gpu_type in gpu_types.get('gpuTypes', []):
+                if gpu_type.get('id') == gpu_id or gpu_type.get('displayName') == gpu_id:
+                    # Found the GPU
+                    result['min_vcpu'] = gpu_type.get('minVcpu')
+                    result['min_memory'] = gpu_type.get('minMemory')
+
+                    # Check community cloud availability
+                    community_stock = gpu_type.get('communityStockStatus', 'Low')
+                    result['community_available'] = community_stock in ['High', 'Medium']
+
+                    # Check secure cloud availability
+                    secure_stock = gpu_type.get('secureStockStatus', 'Low')
+                    result['secure_available'] = secure_stock in ['High', 'Medium']
+
+                    result['available'] = result['community_available'] or result['secure_available']
+                    break
+
+            return result
+
+        except Exception as e:
+            logger.warning(f"Error checking GPU availability: {e}")
+            # On error, assume available to not block deployment
+            result['available'] = True
+            return result
+
     def get_pod_logs(self, pod_id: str) -> Optional[Dict]:
         """
         Get pod logs

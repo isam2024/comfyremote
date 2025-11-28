@@ -23,6 +23,8 @@ export default function DeployForm({ onClose }) {
   const [estimatedCost, setEstimatedCost] = useState(null);
   const [deploying, setDeploying] = useState(false);
   const [error, setError] = useState(null);
+  const [showUnavailableDialog, setShowUnavailableDialog] = useState(false);
+  const [unavailableInfo, setUnavailableInfo] = useState(null);
 
   // Update cost estimate when GPU or interruptible changes
   useEffect(() => {
@@ -66,6 +68,21 @@ export default function DeployForm({ onClose }) {
     setDeploying(true);
 
     try {
+      // Check GPU availability first
+      const availability = await api.gpus.checkAvailability(
+        formData.gpu_id,
+        formData.config.interruptible
+      );
+
+      if (!availability.available) {
+        // GPU is unavailable - show dialog with alternatives
+        setUnavailableInfo(availability);
+        setShowUnavailableDialog(true);
+        setDeploying(false);
+        return;
+      }
+
+      // GPU is available - proceed with deployment
       const response = await api.pods.create(formData);
       actions.addPod(response);
       onClose();
@@ -75,6 +92,27 @@ export default function DeployForm({ onClose }) {
     } finally {
       setDeploying(false);
     }
+  };
+
+  const handleDeployAnyway = async () => {
+    setShowUnavailableDialog(false);
+    setDeploying(true);
+
+    try {
+      const response = await api.pods.create(formData);
+      actions.addPod(response);
+      onClose();
+    } catch (err) {
+      console.error('Failed to create pod:', err);
+      setError(err.message);
+    } finally {
+      setDeploying(false);
+    }
+  };
+
+  const handleSelectAlternative = (gpuId) => {
+    setFormData(prev => ({ ...prev, gpu_id: gpuId }));
+    setShowUnavailableDialog(false);
   };
 
   const isValid = formData.name && formData.gpu_id;
@@ -257,6 +295,76 @@ export default function DeployForm({ onClose }) {
           )}
         </form>
       </div>
+
+      {/* GPU Unavailable Warning Dialog */}
+      {showUnavailableDialog && unavailableInfo && (
+        <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10">
+          <div className="bg-dark-700 rounded-lg max-w-lg w-full mx-4 p-6">
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-yellow-400 mb-2">
+                GPU Unavailable
+              </h3>
+              <p className="text-gray-300">
+                {unavailableInfo.message}
+              </p>
+            </div>
+
+            {/* Show alternatives if available */}
+            {unavailableInfo.alternatives && unavailableInfo.alternatives.length > 0 && (
+              <div className="mb-6">
+                <p className="text-sm text-gray-400 mb-3">
+                  Here are some available alternatives with similar pricing:
+                </p>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {unavailableInfo.alternatives.map((alt) => (
+                    <button
+                      key={alt.gpu_id}
+                      onClick={() => handleSelectAlternative(alt.gpu_id)}
+                      className="w-full text-left bg-dark-600 hover:bg-dark-500 rounded p-3 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="font-semibold text-white">{alt.name}</span>
+                        <span className="text-blue-400 font-semibold">
+                          ${alt.cost_per_hour}/hr
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {alt.vram} VRAM •
+                        {alt.cost_diff > 0 ? ' +' : ' '}${alt.cost_diff}/hr difference
+                      </div>
+                      <div className="text-xs text-green-400 mt-1">
+                        Available in: {[
+                          alt.community_available && 'Community Cloud',
+                          alt.secure_available && 'Secure Cloud'
+                        ].filter(Boolean).join(', ')}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowUnavailableDialog(false)}
+                className="btn btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeployAnyway}
+                className="btn btn-primary flex-1"
+              >
+                Deploy Anyway
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 text-center mt-3">
+              "Deploy Anyway" will attempt deployment. RunPod may assign an alternative GPU.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
