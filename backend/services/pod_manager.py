@@ -358,9 +358,6 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
 
                         # Check if pod is running
                         if current_status == 'RUNNING':
-                            pod.status = POD_STATUS_RUNNING
-                            pod.setup_progress = 100.0
-
                             # Get endpoint URL
                             endpoint_url = self.runpod_client.get_endpoint_url(
                                 pod.pod_id,
@@ -369,18 +366,34 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
                             )
                             pod.endpoint_url = endpoint_url
 
-                            pod.add_log("✓ ComfyUI is running!")
-                            pod.add_log(f"✓ Endpoint: {endpoint_url}")
+                            # Verify ComfyUI is actually accessible
+                            try:
+                                import requests
+                                response = requests.get(endpoint_url, timeout=10)
+                                if response.status_code == 200:
+                                    # ComfyUI is truly ready!
+                                    pod.status = POD_STATUS_RUNNING
+                                    pod.setup_progress = 100.0
+                                    pod.add_log("✓ ComfyUI is running!")
+                                    pod.add_log(f"✓ Endpoint: {endpoint_url}")
 
-                            # Broadcast status update
-                            if self.sse_broadcaster:
-                                self.sse_broadcaster.broadcast_pod_status(
-                                    pod.pod_id,
-                                    POD_STATUS_RUNNING,
-                                    endpoint_url=endpoint_url,
-                                    uptime=pod.get_uptime_formatted()
-                                )
-                            break
+                                    # Broadcast status update
+                                    if self.sse_broadcaster:
+                                        self.sse_broadcaster.broadcast_pod_status(
+                                            pod.pod_id,
+                                            POD_STATUS_RUNNING,
+                                            endpoint_url=endpoint_url,
+                                            uptime=pod.get_uptime_formatted()
+                                        )
+                                    break
+                                else:
+                                    # Container running but ComfyUI not ready yet
+                                    pod.setup_progress = min(pod.setup_progress + 5, 95)
+                                    logger.debug(f"Pod {pod.pod_id} container running, waiting for ComfyUI (HTTP {response.status_code})...")
+                            except Exception as e:
+                                # Endpoint not accessible yet - keep monitoring
+                                pod.setup_progress = min(pod.setup_progress + 5, 95)
+                                logger.debug(f"Pod {pod.pod_id} container running, waiting for ComfyUI endpoint...")
 
                     except Exception as log_error:
                         logger.debug(f"Error fetching logs: {log_error}")
