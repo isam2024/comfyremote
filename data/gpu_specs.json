@@ -1,0 +1,328 @@
+{
+  "gpus": [
+    {
+      "id": "AMD Instinct MI300X OAM",
+      "display_name": "AMD Instinct MI300X OAM",
+      "vram_gb": 192,
+      "sys_ram_gb": 256,
+      "cost_per_hour": 2.99,
+      "tier": "premium"
+    },
+    {
+      "id": "NVIDIA A100 80GB PCIe",
+      "display_name": "NVIDIA A100 80GB PCIe",
+      "vram_gb": 80,
+      "sys_ram_gb": 256,
+      "cost_per_hour": 1.19,
+      "tier": "high"
+    },
+    {
+      "id": "NVIDIA A100-SXM4-80GB",
+      "display_name": "NVIDIA A100-SXM4-80GB",
+      "vram_gb": 80,
+      "sys_ram_gb": 256,
+      "cost_per_hour": 0.95,
+      "tier": "high"
+    },
+    {
+      "id": "NVIDIA A40",
+      "display_name": "NVIDIA A40",
+      "vram_gb": 48,
+      "sys_ram_gb": 128,
+      "cost_per_hour": 0.28,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA B200",
+      "display_name": "NVIDIA B200",
+      "vram_gb": 180,
+      "sys_ram_gb": 512,
+      "cost_per_hour": 8.64,
+      "tier": "premium"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 3070",
+      "display_name": "NVIDIA GeForce RTX 3070",
+      "vram_gb": 8,
+      "sys_ram_gb": 30,
+      "vcpu": 8,
+      "cost_per_hour": 0.07,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 3080",
+      "display_name": "NVIDIA GeForce RTX 3080",
+      "vram_gb": 10,
+      "sys_ram_gb": 64,
+      "cost_per_hour": 0.09,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 3080 Ti",
+      "display_name": "NVIDIA GeForce RTX 3080 Ti",
+      "vram_gb": 12,
+      "sys_ram_gb": 18,
+      "vcpu": 8,
+      "cost_per_hour": 0.18,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 3090",
+      "display_name": "NVIDIA GeForce RTX 3090",
+      "vram_gb": 24,
+      "sys_ram_gb": 20,
+      "vcpu": 4,
+      "cost_per_hour": 0.22,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 3090 Ti",
+      "display_name": "NVIDIA GeForce RTX 3090 Ti",
+      "vram_gb": 24,
+      "sys_ram_gb": 64,
+      "cost_per_hour": 0.12,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 4070 Ti",
+      "display_name": "NVIDIA GeForce RTX 4070 Ti",
+      "vram_gb": 12,
+      "sys_ram_gb": 64,
+      "cost_per_hour": 0.10,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 4080",
+      "display_name": "NVIDIA GeForce RTX 4080",
+      "vram_gb": 16,
+      "sys_ram_gb": 64,
+      "cost_per_hour": 0.17,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 4080 SUPER",
+      "display_name": "NVIDIA GeForce RTX 4080 SUPER",
+      "vram_gb": 16,
+      "sys_ram_gb": 64,
+      "cost_per_hour": 0.18,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 4090",
+      "display_name": "NVIDIA GeForce RTX 4090",
+      "vram_gb": 24,
+      "sys_ram_gb": 128,
+      "cost_per_hour": 0.20,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 5080",
+      "display_name": "NVIDIA GeForce RTX 5080",
+      "vram_gb": 16,
+      "sys_ram_gb": 64,
+      "cost_per_hour": 0.19,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA GeForce RTX 5090",
+      "display_name": "NVIDIA GeForce RTX 5090",
+      "vram_gb": 32,
+      "sys_ram_gb": 128,
+      "cost_per_hour": 0.25,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA H100 80GB HBM3",
+      "display_name": "NVIDIA H100 80GB HBM3",
+      "vram_gb": 80,
+      "sys_ram_gb": 256,
+      "cost_per_hour": 1.50,
+      "tier": "high"
+    },
+    {
+      "id": "NVIDIA H100 NVL",
+      "display_name": "NVIDIA H100 NVL",
+      "vram_gb": 94,
+      "sys_ram_gb": 256,
+      "cost_per_hour": 1.40,
+      "tier": "high"
+    },
+    {
+      "id": "NVIDIA H100 PCIe",
+      "display_name": "NVIDIA H100 PCIe",
+      "vram_gb": 80,
+      "sys_ram_gb": 256,
+      "cost_per_hour": 1.45,
+      "tier": "high"
+    },
+    {
+      "id": "NVIDIA H200",
+      "display_name": "NVIDIA H200",
+      "vram_gb": 141,
+      "sys_ram_gb": 512,
+      "cost_per_hour": 5.60,
+      "tier": "premium"
+    },
+    {
+      "id": "NVIDIA L4",
+      "display_name": "NVIDIA L4",
+      "vram_gb": 24,
+      "sys_ram_gb": 64,
+      "cost_per_hour": 0.68,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA L40",
+      "display_name": "NVIDIA L40",
+      "vram_gb": 48,
+      "sys_ram_gb": 128,
+      "cost_per_hour": 0.50,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA L40S",
+      "display_name": "NVIDIA L40S",
+      "vram_gb": 48,
+      "sys_ram_gb": 128,
+      "cost_per_hour": 0.40,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA RTX 2000 Ada Generation",
+      "display_name": "NVIDIA RTX 2000 Ada Generation",
+      "vram_gb": 16,
+      "sys_ram_gb": 64,
+      "cost_per_hour": 0.14,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA RTX 4000 Ada Generation",
+      "display_name": "NVIDIA RTX 4000 Ada Generation",
+      "vram_gb": 20,
+      "sys_ram_gb": 64,
+      "cost_per_hour": 0.10,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA RTX 4000 SFF Ada Generation",
+      "display_name": "NVIDIA RTX 4000 SFF Ada Generation",
+      "vram_gb": 20,
+      "sys_ram_gb": 64,
+      "cost_per_hour": 0.11,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA RTX 5000 Ada Generation",
+      "display_name": "NVIDIA RTX 5000 Ada Generation",
+      "vram_gb": 32,
+      "sys_ram_gb": 128,
+      "cost_per_hour": 0.25,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA RTX 6000 Ada Generation",
+      "display_name": "NVIDIA RTX 6000 Ada Generation",
+      "vram_gb": 48,
+      "sys_ram_gb": 128,
+      "cost_per_hour": 0.40,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA RTX A2000",
+      "display_name": "NVIDIA RTX A2000",
+      "vram_gb": 6,
+      "sys_ram_gb": 32,
+      "vcpu": 4,
+      "cost_per_hour": 0.06,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA RTX A4000",
+      "display_name": "NVIDIA RTX A4000",
+      "vram_gb": 16,
+      "sys_ram_gb": 30,
+      "vcpu": 5,
+      "cost_per_hour": 0.17,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA RTX A4500",
+      "display_name": "NVIDIA RTX A4500",
+      "vram_gb": 20,
+      "sys_ram_gb": 30,
+      "vcpu": 7,
+      "cost_per_hour": 0.19,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA RTX A5000",
+      "display_name": "NVIDIA RTX A5000",
+      "vram_gb": 24,
+      "sys_ram_gb": 20,
+      "vcpu": 8,
+      "cost_per_hour": 0.16,
+      "tier": "budget"
+    },
+    {
+      "id": "NVIDIA RTX A6000",
+      "display_name": "NVIDIA RTX A6000",
+      "vram_gb": 48,
+      "sys_ram_gb": 58,
+      "vcpu": 8,
+      "cost_per_hour": 0.33,
+      "tier": "mid"
+    },
+    {
+      "id": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "display_name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "vram_gb": 96,
+      "sys_ram_gb": 256,
+      "cost_per_hour": 1.20,
+      "tier": "high"
+    },
+    {
+      "id": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "display_name": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "vram_gb": 96,
+      "sys_ram_gb": 256,
+      "cost_per_hour": 1.20,
+      "tier": "high"
+    },
+    {
+      "id": "Tesla V100-FHHL-16GB",
+      "display_name": "Tesla V100-FHHL-16GB",
+      "vram_gb": 16,
+      "sys_ram_gb": 31,
+      "vcpu": 6,
+      "cost_per_hour": 0.19,
+      "tier": "budget"
+    },
+    {
+      "id": "Tesla V100-PCIE-16GB",
+      "display_name": "Tesla V100-PCIE-16GB",
+      "vram_gb": 16,
+      "sys_ram_gb": 43,
+      "vcpu": 4,
+      "cost_per_hour": 0.19,
+      "tier": "budget"
+    },
+    {
+      "id": "Tesla V100-SXM2-16GB",
+      "display_name": "Tesla V100-SXM2-16GB",
+      "vram_gb": 16,
+      "sys_ram_gb": 62,
+      "vcpu": 10,
+      "cost_per_hour": 0.23,
+      "tier": "budget"
+    },
+    {
+      "id": "Tesla V100-SXM2-32GB",
+      "display_name": "Tesla V100-SXM2-32GB",
+      "vram_gb": 32,
+      "sys_ram_gb": 93,
+      "vcpu": 20,
+      "cost_per_hour": 0.33,
+      "tier": "mid"
+    }
+  ]
+}
