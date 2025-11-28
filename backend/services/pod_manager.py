@@ -541,9 +541,6 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
                 if self.sse_broadcaster:
                     self.sse_broadcaster.broadcast_pod_terminated(pod_id)
 
-                # Remove from tracking (optional - keep for history)
-                # del self.pods[pod_id]
-
                 logger.info(f"Pod terminated successfully: {pod_id}")
                 return True
             else:
@@ -552,6 +549,35 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
         except Exception as e:
             logger.error(f"Failed to terminate pod {pod_id}: {e}")
             raise RuntimeError(f"Termination failed: {str(e)}")
+
+    def remove_pod(self, pod_id: str) -> bool:
+        """
+        Remove a pod from tracking
+
+        Args:
+            pod_id: Pod ID
+
+        Returns:
+            True if successful
+
+        Raises:
+            ValueError: If pod not found
+        """
+        pod = self.get_pod(pod_id)
+        if not pod:
+            raise ValueError(f"Pod not found: {pod_id}")
+
+        logger.info(f"Removing pod from tracking: {pod_id}")
+
+        # Remove from tracking
+        del self.pods[pod_id]
+
+        # Broadcast removal
+        if self.sse_broadcaster:
+            self.sse_broadcaster.broadcast_pod_terminated(pod_id)
+
+        logger.info(f"Pod removed from tracking: {pod_id}")
+        return True
 
     def _sync_from_runpod(self):
         """

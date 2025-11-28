@@ -212,6 +212,42 @@ def terminate_pod(pod_id):
         return jsonify({'error': 'Internal server error'}), HTTP_INTERNAL_ERROR
 
 
+@pods_bp.route('/<pod_id>/remove', methods=['DELETE'])
+def remove_pod(pod_id):
+    """
+    Remove a pod from tracking (without terminating it in RunPod)
+
+    Args:
+        pod_id: Pod ID
+
+    Returns:
+        JSON response with removal status
+    """
+    try:
+        pod_manager = current_app.config['POD_MANAGER']
+
+        pod = pod_manager.get_pod(pod_id)
+        if not pod:
+            return jsonify({'error': 'Pod not found'}), HTTP_NOT_FOUND
+
+        # Remove from tracking
+        success = pod_manager.remove_pod(pod_id)
+
+        return jsonify({
+            'success': success,
+            'pod_id': pod_id,
+            'message': 'Pod removed from tracking'
+        }), HTTP_OK
+
+    except ValueError as e:
+        logger.error(f"Pod not found: {e}")
+        return jsonify({'error': str(e)}), HTTP_NOT_FOUND
+
+    except Exception as e:
+        logger.error(f"Error removing pod: {e}")
+        return jsonify({'error': str(e)}), HTTP_INTERNAL_ERROR
+
+
 @pods_bp.route('/<pod_id>/logs', methods=['GET'])
 def get_pod_logs(pod_id):
     """

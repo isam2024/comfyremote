@@ -85,6 +85,15 @@ export const podApi = {
   async getLogs(podId) {
     return apiRequest(`/pods/${podId}/logs`);
   },
+
+  /**
+   * Remove a pod from tracking
+   */
+  async remove(podId) {
+    return apiRequest(`/pods/${podId}/remove`, {
+      method: 'DELETE',
+    });
+  },
 };
 
 /**

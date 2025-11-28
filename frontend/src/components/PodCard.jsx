@@ -10,6 +10,7 @@ export default function PodCard({ pod }) {
   const { actions } = useApp();
   const [terminating, setTerminating] = useState(false);
   const [resuming, setResuming] = useState(false);
+  const [removing, setRemoving] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
 
   const handleResume = async () => {
@@ -41,6 +42,24 @@ export default function PodCard({ pod }) {
       alert(`Failed to terminate pod: ${error.message}`);
     } finally {
       setTerminating(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!confirm(`Remove pod "${pod.name}" from tracking?\n\nThis only removes it from the UI. The pod must be terminated in RunPod first.`)) {
+      return;
+    }
+
+    setRemoving(true);
+
+    try {
+      await api.pods.remove(pod.pod_id);
+      // State will be updated via SSE
+    } catch (error) {
+      console.error('Failed to remove pod:', error);
+      alert(`Failed to remove pod: ${error.message}`);
+    } finally {
+      setRemoving(false);
     }
   };
 
@@ -160,6 +179,16 @@ export default function PodCard({ pod }) {
             className="btn btn-danger flex-1"
           >
             {terminating ? 'Terminating...' : 'Terminate'}
+          </button>
+        )}
+
+        {(pod.status === 'stopped' || pod.status === 'terminated' || pod.status === 'failed') && (
+          <button
+            onClick={handleRemove}
+            disabled={removing}
+            className="btn btn-danger flex-1"
+          >
+            {removing ? 'Removing...' : 'Remove'}
           </button>
         )}
 
