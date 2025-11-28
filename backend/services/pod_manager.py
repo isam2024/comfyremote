@@ -86,6 +86,14 @@ class PodManager:
             from utils.gpu_specs import get_gpu_cost
             hourly_rate = get_gpu_cost(gpu_id, pod_config.interruptible)
 
+            # Get actual creation time from RunPod API (convert from UTC string)
+            created_at_str = pod_info.get('createdAt', '')
+            if created_at_str:
+                # Parse RunPod's UTC timestamp format: "2025-11-27 17:56:21.701466089 +0000 UTC"
+                start_time = datetime.strptime(created_at_str.replace(' +0000 UTC', ''), '%Y-%m-%d %H:%M:%S.%f')
+            else:
+                start_time = datetime.now()
+
             # Create pod object
             pod = Pod(
                 pod_id=pod_id,
@@ -93,7 +101,7 @@ class PodManager:
                 gpu_id=gpu_id,
                 config=pod_config,
                 status=POD_STATUS_INITIALIZING,
-                start_time=datetime.now(),
+                start_time=start_time,
                 hourly_rate=hourly_rate,
             )
 
