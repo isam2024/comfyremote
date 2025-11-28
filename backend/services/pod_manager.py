@@ -82,6 +82,10 @@ class PodManager:
             if not pod_id:
                 raise RuntimeError("Pod creation failed: no pod ID returned")
 
+            # Calculate hourly rate
+            from utils.gpu_specs import get_gpu_cost
+            hourly_rate = get_gpu_cost(gpu_id, pod_config.interruptible)
+
             # Create pod object
             pod = Pod(
                 pod_id=pod_id,
@@ -90,6 +94,7 @@ class PodManager:
                 config=pod_config,
                 status=POD_STATUS_INITIALIZING,
                 start_time=datetime.now(),
+                hourly_rate=hourly_rate,
             )
 
             # Store pod

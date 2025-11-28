@@ -47,6 +47,7 @@ class Pod:
     start_time: Optional[datetime] = None
     endpoint_url: Optional[str] = None
     cost_so_far: float = 0.0
+    hourly_rate: float = 0.0
     setup_progress: float = 0.0
     last_heartbeat: Optional[datetime] = None
     setup_logs: List[str] = field(default_factory=list)
@@ -92,6 +93,7 @@ class Pod:
             start_time=datetime.fromisoformat(data['start_time']) if data.get('start_time') else None,
             endpoint_url=data.get('endpoint_url'),
             cost_so_far=data.get('cost_so_far', 0.0),
+            hourly_rate=data.get('hourly_rate', 0.0),
             setup_progress=data.get('setup_progress', 0.0),
             last_heartbeat=datetime.fromisoformat(data['last_heartbeat']) if data.get('last_heartbeat') else None,
             setup_logs=data.get('setup_logs', []),
