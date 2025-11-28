@@ -71,6 +71,15 @@ export const podApi = {
   },
 
   /**
+   * Resume a stopped pod
+   */
+  async resume(podId) {
+    return apiRequest(`/pods/${podId}/resume`, {
+      method: 'POST',
+    });
+  },
+
+  /**
    * Get pod logs
    */
   async getLogs(podId) {

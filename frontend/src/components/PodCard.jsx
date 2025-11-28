@@ -9,7 +9,22 @@ import { useApp } from '../context/AppContext';
 export default function PodCard({ pod }) {
   const { actions } = useApp();
   const [terminating, setTerminating] = useState(false);
+  const [resuming, setResuming] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
+
+  const handleResume = async () => {
+    setResuming(true);
+
+    try {
+      await api.pods.resume(pod.pod_id);
+      // State will be updated via SSE
+    } catch (error) {
+      console.error('Failed to resume pod:', error);
+      alert(`Failed to resume pod: ${error.message}`);
+    } finally {
+      setResuming(false);
+    }
+  };
 
   const handleTerminate = async () => {
     if (!confirm(`Are you sure you want to terminate pod "${pod.name}"?`)) {
@@ -122,6 +137,16 @@ export default function PodCard({ pod }) {
             className="btn btn-primary flex-1"
           >
             Open ComfyUI
+          </button>
+        )}
+
+        {(pod.status === 'stopped' || pod.status === 'terminated') && (
+          <button
+            onClick={handleResume}
+            disabled={resuming}
+            className="btn btn-success flex-1"
+          >
+            {resuming ? 'Starting...' : 'Start Pod'}
           </button>
         )}
 

@@ -143,6 +143,43 @@ class RunPodClient:
             logger.error(f"Failed to list pods: {e}")
             raise
 
+    def resume_pod(self, pod_id: str) -> bool:
+        """
+        Resume/start a stopped pod
+
+        Args:
+            pod_id: Pod ID
+
+        Returns:
+            True if successful
+
+        Raises:
+            requests.RequestException: If API call fails
+        """
+        url = f"{self.base_url}/pods/{pod_id}/resume"
+
+        logger.info(f"Resuming pod: {pod_id}")
+
+        try:
+            response = requests.post(
+                url,
+                headers=self._get_headers(),
+                json={},
+                timeout=30
+            )
+
+            if response.status_code in [200, 204]:
+                logger.info(f"Pod resumed successfully: {pod_id}")
+                return True
+            else:
+                logger.error(f"Unexpected status code: {response.status_code}")
+                response.raise_for_status()
+                return False
+
+        except requests.RequestException as e:
+            logger.error(f"Failed to resume pod {pod_id}: {e}")
+            raise
+
     def terminate_pod(self, pod_id: str) -> bool:
         """
         Terminate a pod

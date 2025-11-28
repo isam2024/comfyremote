@@ -142,6 +142,41 @@ def get_pod(pod_id):
         return jsonify({'error': str(e)}), HTTP_INTERNAL_ERROR
 
 
+@pods_bp.route('/<pod_id>/resume', methods=['POST'])
+def resume_pod(pod_id):
+    """
+    Resume a stopped pod
+
+    Args:
+        pod_id: Pod ID
+
+    Returns:
+        JSON response with success status
+    """
+    try:
+        pod_manager = current_app.config['POD_MANAGER']
+
+        # Resume pod
+        success = pod_manager.resume_pod(pod_id)
+
+        return jsonify({
+            'success': success,
+            'message': f'Pod {pod_id} resumed successfully'
+        }), HTTP_OK
+
+    except ValueError as e:
+        logger.error(f"Validation error: {e}")
+        return jsonify({'error': str(e)}), HTTP_NOT_FOUND
+
+    except RuntimeError as e:
+        logger.error(f"Runtime error: {e}")
+        return jsonify({'error': str(e)}), HTTP_INTERNAL_ERROR
+
+    except Exception as e:
+        logger.error(f"Error resuming pod {pod_id}: {e}")
+        return jsonify({'error': str(e)}), HTTP_INTERNAL_ERROR
+
+
 @pods_bp.route('/<pod_id>', methods=['DELETE'])
 def terminate_pod(pod_id):
     """

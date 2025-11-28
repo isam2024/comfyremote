@@ -434,6 +434,54 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
         """
         return list(self.pods.values())
 
+    def resume_pod(self, pod_id: str) -> bool:
+        """
+        Resume a stopped pod
+
+        Args:
+            pod_id: Pod ID
+
+        Returns:
+            True if successful
+
+        Raises:
+            ValueError: If pod not found
+            RuntimeError: If resume fails
+        """
+        pod = self.get_pod(pod_id)
+        if not pod:
+            raise ValueError(f"Pod not found: {pod_id}")
+
+        logger.info(f"Resuming pod: {pod_id}")
+
+        try:
+            # Resume via RunPod API
+            success = self.runpod_client.resume_pod(pod_id)
+
+            if success:
+                # Update pod status
+                pod.status = POD_STATUS_INITIALIZING
+                pod.add_log("Pod resuming...")
+
+                # Broadcast status update
+                if self.sse_broadcaster:
+                    self.sse_broadcaster.broadcast_pod_status(
+                        pod_id,
+                        POD_STATUS_INITIALIZING
+                    )
+
+                # Start monitoring setup again
+                self._start_pod_setup_monitor(pod)
+
+                logger.info(f"Pod resumed successfully: {pod_id}")
+                return True
+            else:
+                raise RuntimeError("Resume failed")
+
+        except Exception as e:
+            logger.error(f"Failed to resume pod {pod_id}: {e}")
+            raise RuntimeError(f"Resume failed: {str(e)}")
+
     def terminate_pod(self, pod_id: str) -> bool:
         """
         Terminate a pod
@@ -498,7 +546,26 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
 
                 # Reconstruct pod object from RunPod data
                 name = pod_info.get('name', f'pod-{pod_id[:8]}')
-                gpu_id = pod_info.get('gpuTypeIds', ['Unknown'])[0] if pod_info.get('gpuTypeIds') else 'Unknown'
+
+                # Try to get GPU from machine info or gpuTypeIds
+                gpu_id = 'Unknown'
+                if pod_info.get('gpuTypeIds'):
+                    gpu_id = pod_info.get('gpuTypeIds')[0]
+                elif pod_info.get('machine', {}).get('gpuDisplayName'):
+                    gpu_id = pod_info['machine']['gpuDisplayName']
+                else:
+                    # Try fetching individual pod details for GPU info
+                    try:
+                        detailed_info = self.runpod_client.get_pod(pod_id)
+                        if detailed_info.get('gpuTypeIds'):
+                            gpu_id = detailed_info['gpuTypeIds'][0]
+                        elif detailed_info.get('machine', {}).get('gpuDisplayName'):
+                            gpu_id = detailed_info['machine']['gpuDisplayName']
+                    except:
+                        pass
+
+                # Get cost per hour from RunPod
+                cost_per_hour = float(pod_info.get('costPerHr', 0))
 
                 # Map RunPod status to our status
                 runpod_status = pod_info.get('desiredStatus', 'UNKNOWN').upper()
@@ -510,6 +577,38 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
                 }
                 status = status_map.get(runpod_status, POD_STATUS_STOPPED)
 
+                # Parse timestamps to calculate runtime cost
+                created_at_str = pod_info.get('createdAt')
+                start_time = datetime.now()
+                if created_at_str:
+                    try:
+                        # Parse RunPod timestamp: "2025-11-28 01:17:13.837 +0000 UTC"
+                        created_at_str = created_at_str.replace(' +0000 UTC', '')
+                        start_time = datetime.strptime(created_at_str, '%Y-%m-%d %H:%M:%S.%f')
+                    except:
+                        pass
+
+                # Calculate cost based on runtime
+                cost_so_far = 0.0
+                if status in [POD_STATUS_RUNNING, POD_STATUS_INITIALIZING]:
+                    runtime_hours = (datetime.now() - start_time).total_seconds() / 3600
+                    cost_so_far = runtime_hours * cost_per_hour
+                elif status in [POD_STATUS_STOPPED, POD_STATUS_TERMINATED]:
+                    # For stopped pods, try to get runtime from lastStartedAt to lastStatusChange
+                    last_started = pod_info.get('lastStartedAt')
+                    last_status_change = pod_info.get('lastStatusChange')
+                    if last_started:
+                        try:
+                            last_started = last_started.replace(' +0000 UTC', '')
+                            started = datetime.strptime(last_started, '%Y-%m-%d %H:%M:%S.%f')
+                            # For stopped pods, use start time
+                            start_time = started
+                            # Estimate runtime (rough calculation)
+                            runtime_hours = 0.1  # Minimum charge
+                            cost_so_far = runtime_hours * cost_per_hour
+                        except:
+                            pass
+
                 # Create minimal pod config (we don't have full config from RunPod)
                 pod_config = PodConfig()
 
@@ -520,8 +619,12 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
                     gpu_id=gpu_id,
                     config=pod_config,
                     status=status,
-                    start_time=datetime.now(),  # We don't have exact start time
+                    start_time=start_time,
                 )
+
+                # Set hourly rate and cost
+                pod.hourly_rate = cost_per_hour
+                pod.cost_so_far = cost_so_far
 
                 # Get endpoint URL if running
                 if status == POD_STATUS_RUNNING:
