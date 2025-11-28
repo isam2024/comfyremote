@@ -547,6 +547,9 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
                 # Reconstruct pod object from RunPod data
                 name = pod_info.get('name', f'pod-{pod_id[:8]}')
 
+                # Get cost per hour from RunPod
+                cost_per_hour = float(pod_info.get('costPerHr', 0))
+
                 # Try to get GPU from machine info or gpuTypeIds
                 gpu_id = 'Unknown'
                 if pod_info.get('gpuTypeIds'):
@@ -564,8 +567,12 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
                     except:
                         pass
 
-                # Get cost per hour from RunPod
-                cost_per_hour = float(pod_info.get('costPerHr', 0))
+                    # If still unknown, try to infer from cost
+                    if gpu_id == 'Unknown' and cost_per_hour > 0:
+                        # Try to match cost to GPU specs
+                        gpu_spec = get_gpu_by_id(None, cost_per_hour=cost_per_hour)
+                        if gpu_spec:
+                            gpu_id = gpu_spec['id']
 
                 # Map RunPod status to our status
                 runpod_status = pod_info.get('desiredStatus', 'UNKNOWN').upper()

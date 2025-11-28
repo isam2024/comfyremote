@@ -36,10 +36,40 @@ def get_gpu_specs() -> Dict[str, Dict]:
     return load_gpu_specs()
 
 
-def get_gpu_by_id(gpu_id: str) -> Optional[Dict]:
-    """Get GPU specification by ID"""
+def get_gpu_by_id(gpu_id: Optional[str] = None, cost_per_hour: Optional[float] = None) -> Optional[Dict]:
+    """
+    Get GPU specification by ID or cost
+
+    Args:
+        gpu_id: GPU ID to lookup
+        cost_per_hour: Hourly cost to match (used if gpu_id is None)
+
+    Returns:
+        GPU spec dict or None
+    """
     specs = get_gpu_specs()
-    return specs.get(gpu_id)
+
+    # Lookup by ID
+    if gpu_id:
+        return specs.get(gpu_id)
+
+    # Lookup by cost (find closest match)
+    if cost_per_hour is not None:
+        closest_gpu = None
+        closest_diff = float('inf')
+
+        for gpu in specs.values():
+            gpu_cost = gpu.get('cost_per_hour', 0)
+            # Check both community (1x) and secure (2x) pricing
+            for multiplier in [1.0, 2.0]:
+                diff = abs(gpu_cost * multiplier - cost_per_hour)
+                if diff < closest_diff and diff < 0.05:  # Within 5 cents
+                    closest_diff = diff
+                    closest_gpu = gpu
+
+        return closest_gpu
+
+    return None
 
 
 def get_gpus_by_tier(tier: str) -> List[Dict]:
