@@ -33,7 +33,8 @@ class CostCalculator:
         hourly_rate = get_gpu_cost(gpu_id, interruptible)
 
         # Calculate elapsed time in hours
-        elapsed = datetime.now() - start_time
+        # Use utcnow() since RunPod timestamps are in UTC
+        elapsed = datetime.utcnow() - start_time
         elapsed_hours = elapsed.total_seconds() / 3600.0
 
         # Calculate total cost

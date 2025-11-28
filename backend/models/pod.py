@@ -116,7 +116,8 @@ class Pod:
         """Get pod uptime in seconds"""
         if not self.start_time:
             return 0.0
-        return (datetime.now() - self.start_time).total_seconds()
+        # Use utcnow() since start_time is in UTC from RunPod
+        return (datetime.utcnow() - self.start_time).total_seconds()
 
     def get_uptime_formatted(self) -> str:
         """Get formatted uptime string"""

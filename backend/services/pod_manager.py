@@ -612,7 +612,7 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
 
                 # Parse timestamps to calculate runtime cost
                 created_at_str = pod_info.get('createdAt')
-                start_time = datetime.now()
+                start_time = datetime.utcnow()
                 if created_at_str:
                     try:
                         # Parse RunPod timestamp: "2025-11-28 01:17:13.837 +0000 UTC"
@@ -624,7 +624,7 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
                 # Calculate cost based on runtime
                 cost_so_far = 0.0
                 if status in [POD_STATUS_RUNNING, POD_STATUS_INITIALIZING]:
-                    runtime_hours = (datetime.now() - start_time).total_seconds() / 3600
+                    runtime_hours = (datetime.utcnow() - start_time).total_seconds() / 3600
                     cost_so_far = runtime_hours * cost_per_hour
                 elif status in [POD_STATUS_STOPPED, POD_STATUS_TERMINATED]:
                     # For stopped pods, try to get runtime from lastStartedAt to lastStatusChange
