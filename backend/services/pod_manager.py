@@ -654,11 +654,35 @@ sudo -E -u comfyui python3 main.py --listen 0.0.0.0 --port {port}
                         pod_config.public_ip
                     )
                     pod.endpoint_url = endpoint_url
-                    pod.setup_progress = 100.0
+
+                    # Check if ComfyUI is actually accessible
+                    # If not, pod is still setting up - start monitoring
+                    try:
+                        import requests
+                        response = requests.get(endpoint_url, timeout=5)
+                        if response.status_code == 200:
+                            # ComfyUI is running
+                            pod.setup_progress = 100.0
+                            pod.add_log("✓ ComfyUI is running!")
+                        else:
+                            # Container running but ComfyUI not ready yet
+                            pod.status = POD_STATUS_INITIALIZING
+                            pod.setup_progress = 50.0  # Container started
+                            pod.add_log("Container started, setting up ComfyUI...")
+                    except:
+                        # Endpoint not accessible - still setting up
+                        pod.status = POD_STATUS_INITIALIZING
+                        pod.setup_progress = 50.0
+                        pod.add_log("Container started, setting up ComfyUI...")
 
                 # Add to our tracking
                 self.pods[pod_id] = pod
                 logger.info(f"Synced pod from RunPod: {pod_id} ({name}) - {status}")
+
+                # Start monitoring for pods that are still setting up
+                if pod.status == POD_STATUS_INITIALIZING:
+                    logger.info(f"Starting setup monitor for synced pod: {pod_id}")
+                    self._start_pod_setup_monitor(pod)
 
             logger.info(f"Sync complete: {len(runpod_pods)} pods restored from RunPod")
 
